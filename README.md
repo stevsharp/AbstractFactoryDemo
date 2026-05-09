@@ -1,5 +1,3 @@
----
-
 # Abstract Factory Pattern in C#
 
 > A real-world implementation of the **Abstract Factory Design Pattern** using a multi-database access layer that supports:
