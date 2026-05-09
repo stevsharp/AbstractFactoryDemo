@@ -1,16 +1,3 @@
-Here’s a **GitHub README version** of your tutorial—optimized for repositories:
-
-* concise intro
-* architecture diagram
-* project structure
-* setup instructions
-* code snippets
-* usage example
-* references
-* contribution section
-
-This format works much better for GitHub than a long blog-style tutorial.
-
 ---
 
 # Abstract Factory Pattern in C#
