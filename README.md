@@ -1,5 +1,8 @@
 # Abstract Factory Pattern in C#
 
+Read the full article at : 
+(https://coderlegion.com/17410/abstract-factory-pattern-tutorial)
+
 > A real-world implementation of the **Abstract Factory Design Pattern** using a multi-database access layer that supports:
 
 * Microsoft SQL Server
