@@ -15,4 +15,11 @@ public class OracleFactory : DatabaseFactoryBase
 
     public override IDbDataReader CreateDataReader(IDbCommand command)
         => ((OracleCommand)command).ExecuteReader();
+
+    public override IDbParameter CreateParameter(
+        string name, object? value,
+        DbParameterDirection direction = DbParameterDirection.Input,
+        DbType dbType = DbType.Object,
+        int size = 0)
+        => new OracleParameter { Name = name, Value = value, Direction = direction, DbType = dbType, Size = size };
 }

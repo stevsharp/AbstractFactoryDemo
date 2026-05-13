@@ -15,4 +15,11 @@ public class MySqlFactory : DatabaseFactoryBase
 
     public override IDbDataReader CreateDataReader(IDbCommand command)
         => ((MySqlCommand)command).ExecuteReader();
+
+    public override IDbParameter CreateParameter(
+        string name, object? value,
+        DbParameterDirection direction = DbParameterDirection.Input,
+        DbType dbType = DbType.Object,
+        int size = 0)
+        => new MySqlParameter { Name = name, Value = value, Direction = direction, DbType = dbType, Size = size };
 }

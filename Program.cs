@@ -37,7 +37,7 @@ string? choice = Console.ReadLine()?.Trim();
 
 IDatabaseFactory factory;
 string connectionString;
-string selectSql, insertSql, updateSql, countSql;
+string selectSql, insertSql, updateSql, countSql, procSql;
 
 switch (choice)
 {
@@ -51,6 +51,7 @@ switch (choice)
         insertSql = "INSERT INTO [TaskItem] ([TaskName], [IsComplete]) VALUES (@TaskName, @IsComplete)";
         updateSql = "UPDATE [TaskItem] SET [IsComplete] = @IsComplete WHERE [TaskItemId] = @TaskItemId";
         countSql  = "SELECT COUNT(*) FROM [TaskItem]";
+        procSql   = "EXEC sp_GetTaskCount @Filter, @Count OUTPUT, @ReturnCode";
         break;
 
     case "2":
@@ -63,6 +64,7 @@ switch (choice)
         insertSql = "INSERT INTO TaskItem (TaskName, IsComplete) VALUES (@TaskName, @IsComplete)";
         updateSql = "UPDATE TaskItem SET IsComplete = @IsComplete WHERE TaskItemId = @TaskItemId";
         countSql  = "SELECT COUNT(*) FROM TaskItem";
+        procSql   = "CALL sp_GetTaskCount(@Filter, @Count, @ReturnCode)";
         break;
 
     case "3":
@@ -75,6 +77,7 @@ switch (choice)
         insertSql = "INSERT INTO TaskItem (TaskName, IsComplete) VALUES (:TaskName, :IsComplete)";
         updateSql = "UPDATE TaskItem SET IsComplete = :IsComplete WHERE TaskItemId = :TaskItemId";
         countSql  = "SELECT COUNT(*) FROM TaskItem";
+        procSql   = "BEGIN sp_GetTaskCount(:Filter, :Count, :ReturnCode); END;";
         break;
 
     default:
@@ -86,9 +89,10 @@ var client = new DatabaseClient(factory);
 
 Console.WriteLine("\nRunning operations...");
 
-
 try
 {
+    // ── Basic CRUD ───────────────────────────────────────────────────────────
+
     // SELECT
     await client.RunQueryAsync(connectionString, selectSql, ct: cts.Token);
 
@@ -109,6 +113,26 @@ try
 
     // SELECT again to show state after insert + update
     await client.RunQueryAsync(connectionString, selectSql, ct: cts.Token);
+
+    // ── Unit of Work (atomic multi-statement transaction) ────────────────────
+
+    await client.RunUnitOfWorkAsync(
+        connectionString,
+        insertSql: insertSql,
+        taskName: "UoW Task — part of atomic batch",
+        isComplete: false,
+        updateSql: updateSql,
+        taskItemId: 2,
+        updatedIsComplete: true,
+        ct: cts.Token);
+
+    // ── Stored procedure with Input / Output / ReturnValue params ────────────
+
+    await client.RunStoredProcAsync(
+        connectionString,
+        procSql: procSql,
+        filterValue: "active",
+        ct: cts.Token);
 }
 catch (OperationCanceledException)
 {
@@ -117,7 +141,7 @@ catch (OperationCanceledException)
 }
 
 Console.WriteLine("\n==============================================");
-Console.WriteLine("Pattern Used: Abstract Factory");
+Console.WriteLine("Pattern Used: Abstract Factory + Unit of Work");
 Console.WriteLine("==============================================");
 Console.WriteLine($"Selected Factory : {factory.GetType().Name}");
 Console.WriteLine($"Dialect          : {factory.Dialect.GetType().Name}");

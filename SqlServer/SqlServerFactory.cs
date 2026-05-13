@@ -15,4 +15,11 @@ public class SqlServerFactory : DatabaseFactoryBase
 
     public override IDbDataReader CreateDataReader(IDbCommand command)
         => ((SqlServerCommand)command).ExecuteReader();
+
+    public override IDbParameter CreateParameter(
+        string name, object? value,
+        DbParameterDirection direction = DbParameterDirection.Input,
+        DbType dbType = DbType.Object,
+        int size = 0)
+        => new SqlServerParameter { Name = name, Value = value, Direction = direction, DbType = dbType, Size = size };
 }
