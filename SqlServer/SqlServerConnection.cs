@@ -13,8 +13,7 @@ public class SqlServerConnection : IDbConnection
     }
 
     public string ConnectionString { get; }
-
-    public bool IsOpen => _isOpen;
+    public bool   IsOpen           => _isOpen;
 
     public void Open()
     {
@@ -26,6 +25,13 @@ public class SqlServerConnection : IDbConnection
     {
         _isOpen = false;
         Console.WriteLine("  [SQL Server] Connection closed.");
+    }
+
+    public IDbTransaction BeginTransaction()
+    {
+        if (!_isOpen) throw new InvalidOperationException("Connection is not open.");
+        Console.WriteLine("  [SQL Server] Transaction started.");
+        return new SqlServerTransaction();
     }
 
     public Task OpenAsync(CancellationToken ct = default)
@@ -40,5 +46,11 @@ public class SqlServerConnection : IDbConnection
         ct.ThrowIfCancellationRequested();
         Close();
         return Task.CompletedTask;
+    }
+
+    public Task<IDbTransaction> BeginTransactionAsync(CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        return Task.FromResult(BeginTransaction());
     }
 }
